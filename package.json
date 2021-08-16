@@ -1,0 +1,15 @@
+{
+	"name": "lfa-tp-glc",
+	"version": "0.1.0",
+	"description": "Trabalho prático de Linguagens Formais e Autômatos: gerador de palavras de Gramáticas Livres de Contexto (GLC)",
+	"main": "index.js",
+	"scripts": {
+		"test": "node index.js iguais.json 4",
+		"start": "node index.js"
+	},
+	"author": "Lucas Rassilan Vilanova",
+	"license": "ISC",
+	"dependencies": {
+		"jsonfile": "^6.1.0"
+	}
+}
