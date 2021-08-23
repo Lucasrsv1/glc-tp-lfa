@@ -15,18 +15,23 @@ try {
 	process.exit();
 }
 
+/**
+ * @type {Set<string>} Conjunto de palavras da GLC
+ */
 const result = new Set();
 
 /**
- * @param {string} palavra
+ * Retorna o tamanho real da palavra contando apenas os símbolos e ignorando as variáveis
+ * @param {string} palavra palavra alvo
  * @returns {number}
  */
-function realTamanho (palavra) {
+function tamanhoReal (palavra) {
 	return palavra.split("").filter(c => glc[0].indexOf(c) === -1).length;
 }
 
 /**
- * @param {string} palavra
+ * Identifica a primeira variável da palavra, caso exista
+ * @param {string} palavra palavra alvo
  * @returns {string}
  */
 function obtemProximoEstado (palavra) {
@@ -34,30 +39,49 @@ function obtemProximoEstado (palavra) {
 }
 
 /**
- * @param {string} palavra
- * @param {string} estadoAtual
+ * Processa o estado atual, dada uma palavra
+ * @param {string} palavra palavra formada até o momento contendo símbolos e variáveis
+ * @param {string} estadoAtual estado/variável da palavra a ser processado
  */
 function processaEstado (palavra, estadoAtual) {
+	// Localiza a posição da variável do estado atual na palavra
 	const idx = palavra.indexOf(estadoAtual)
+
+	// Identifica o conjunto de regras da GLC para o estado/variável atual
 	let regrasEstadoAtual = glc[2].filter(r => r[0] == estadoAtual).map(r => r[1]);
 
 	for (let regra of regrasEstadoAtual) {
-		if (realTamanho(regra) > N) continue;
+		// Ignora regras com mais símbolos do que o tamanho máximo
+		if (tamanhoReal(regra) > N) continue;
 
-		const conteudo = regra != "#" || realTamanho(palavra) === 0 ? regra : "";
+		// Obtém o conteúdo da regra tratando o caso lambda
+		const conteudo = regra != "#" || tamanhoReal(palavra) === 0 ? regra : "";
+
+		// Substitui na palavra a variável pelo seu conteúdo seguindo a regra atual
 		const palavraProcessada = palavra.substr(0, idx) + conteudo + palavra.substr(idx + 1);
-		if (realTamanho(palavraProcessada) > N) continue;
 
+		// Ignora palavra com mais símbolos do que o tamanho máximo
+		if (tamanhoReal(palavraProcessada) > N) continue;
+
+		// Identifica a próxima variável contida na palavra
 		const proxEstado = obtemProximoEstado(palavraProcessada);
-		if (!proxEstado)
+
+		// Se não há uma próxima variável
+		if (!proxEstado) {
+			// Adiciona a palavra resultante ao conjunto de palavras da GLC
 			result.add(palavraProcessada);
-		else
+		} else {
+			// Do contrário, processa a palavra resultante a partir do
+			// estado da primeira variável identificada na palavra
 			processaEstado(palavraProcessada.replace(/#/g, ""), proxEstado);
+		}
 	}
 }
 
+// Começa a gerar uma palavra a partir do estado/variável inicial
 let palavra = glc[3];
 processaEstado(palavra, glc[3]);
 
+// Imprime todas as palavras da GLC com tamanho até N
 for (const w of result)
 	console.log(w);
